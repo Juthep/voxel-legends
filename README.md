@@ -75,3 +75,9 @@ Se o Node.js não estiver instalado, obtenha-o em https://nodejs.org/ e execute 
 - Ligado o evento `wheel` ao zoom da câmera.
 - `INICIAR-JOGO.bat` agora roda `npm run build` antes de abrir o navegador, evitando mostrar uma tela de erro caso haja problemas.
 - **Validação limitada:** `npm install` não foi possível neste ambiente por falha de DNS (`EAI_AGAIN` para registry.npmjs.org); compilação completa e teste no navegador continuam pendentes.
+
+## Publicação no Render
+
+Configurar como Static Site, branch `main`, comando de build `npm ci && npm run build`, diretório publicado `dist`. Node.js 22 definido em `.node-version`. Não requer banco de dados nem variáveis secretas.
+
+Validação de publicação: instalação concluída, build TypeScript + Vite aprovado e 4 testes de combate aprovados. Execução visual no navegador ainda não verificada.
