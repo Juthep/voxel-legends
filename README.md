@@ -81,3 +81,9 @@ Se o Node.js não estiver instalado, obtenha-o em https://nodejs.org/ e execute 
 Configurar como Static Site, branch `main`, comando de build `npm ci && npm run build`, diretório publicado `dist`. Node.js 22 definido em `.node-version`. Não requer banco de dados nem variáveis secretas.
 
 Validação de publicação: instalação concluída, build TypeScript + Vite aprovado e 4 testes de combate aprovados. Execução visual no navegador ainda não verificada.
+
+## Kael — modelo contínuo
+
+O herói usa um GLB com anatomia contínua, esqueleto e pesos de deformação, carregado de `public/models/kael-sculpt-v1.glb.gz`. O mapa e as tropas mantêm o estilo anterior.
+
+Para reconstruir o modelo com Blender e Node.js: `blender -b --python tools/sculpt_kael.py`, depois `node tools/rig_kael.mjs`. O primeiro comando escreve uma malha intermediária em `/tmp`; o segundo gera o GLB e sua versão compactada. O build do site apenas consome a versão compactada e não precisa de Blender.

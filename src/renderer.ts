@@ -75,6 +75,7 @@ export class WorldRenderer{
  g.userData.lean+=(leanTarget-g.userData.lean)*(1-Math.exp(-dt*24));body.rotation.x=g.userData.lean;
  const pose=(name:string,x:number,y=0,z=0)=>{const limb=g.getObjectByName(name);if(limb)limb.rotation.set(x,y,z);};
  pose('leftLeg',swing);pose('rightLeg',-swing);
+ pose('leftShin',-Math.max(0,-Math.sin(phase))*.42*weight);pose('rightShin',-Math.max(0,Math.sin(phase))*.42*weight);pose('leftForearm',.16);pose('rightForearm',.12);
  pose('leftArm',-swing*.65,0,.04);pose('rightArm',swing*.45-.12,0,-.08);
  if(g.userData.dashing){pose('leftArm',.65,0,.2);pose('rightArm',-.8,0,-.35);pose('leftLeg',.65);pose('rightLeg',-.4);}
  if(g.userData.attack>0){
@@ -98,7 +99,7 @@ export class WorldRenderer{
  if(u.kind==='hero'&&u.alive){
  g.userData.fireTime+=dt;
  const hot=g.userData.spin>0;
- g.traverse(o=>{if(o.name==='bladeFlame'){const pulse=.8+Math.sin(g.userData.fireTime*17+o.position.z*9)*.2;o.scale.set(hot?1.6:1,pulse*(hot?2.3:1),1);}});
+ g.traverse(o=>{if(o.name.startsWith('bladeFlame')){const pulse=.8+Math.sin(g.userData.fireTime*17+o.position.z*9)*.2;o.scale.set(hot?1.6:1,pulse*(hot?2.3:1),1);}});
  g.updateMatrixWorld(true);
  const tip=g.getObjectByName('bladeTip')!.getWorldPosition(new THREE.Vector3());
  const root=g.getObjectByName('bladeRoot')!.getWorldPosition(new THREE.Vector3());
@@ -112,7 +113,7 @@ export class WorldRenderer{
  g.userData.previousTip=tip;
  }
  }
- if(u.kind==='hero'){const glow=g.getObjectByName('shield');if(u.shield>0&&!glow){const sh=new THREE.Mesh(new THREE.SphereGeometry(1.8,12,8),new THREE.MeshBasicMaterial({color:0xffa438,wireframe:true,transparent:true,opacity:.32}));sh.position.y=1.3;sh.name='shield';g.add(sh);}else if(u.shield<=0&&glow)g.remove(glow);}}}
+ if(u.kind==='hero'){const glow=g.getObjectByName('shield');if(u.shield>0&&!glow){const sh=new THREE.Mesh(new THREE.SphereGeometry(1.8,12,8),new THREE.MeshBasicMaterial({color:0xffa438,wireframe:true,transparent:true,opacity:.32}));sh.position.y=1.7;sh.name='shield';g.add(sh);}else if(u.shield<=0&&glow)g.remove(glow);}}}
  flameRibbon(oldRoot:THREE.Vector3,oldTip:THREE.Vector3,root:THREE.Vector3,tip:THREE.Vector3){
  const innerOld=oldRoot.clone().lerp(oldTip,.28),inner=root.clone().lerp(tip,.28);
  const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute([...innerOld.toArray(),...oldTip.toArray(),...inner.toArray(),...tip.toArray()],3));
