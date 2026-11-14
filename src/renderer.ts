@@ -1,11 +1,12 @@
 import * as THREE from 'three';
 import type {Unit} from './combat';
 import {MAP} from './data';
+import {createKael} from './hero-model';
 export class WorldRenderer{
  scene=new THREE.Scene(); renderer:THREE.WebGLRenderer; unitMeshes=new Map<number,THREE.Group>(); ground:THREE.Mesh; effects:{mesh:THREE.Object3D;ttl:number;max:number;fixed?:boolean}[]=[];
  fireParticles:{mesh:THREE.Mesh;life:number;max:number;velocity:THREE.Vector3}[]=[];
  fireGeometry=new THREE.OctahedronGeometry(1,0);
- constructor(host:HTMLElement){this.scene.background=new THREE.Color('#101923');this.scene.fog=new THREE.Fog('#101923',42,95);this.renderer=new THREE.WebGLRenderer({antialias:true});this.renderer.setPixelRatio(Math.min(devicePixelRatio,2));this.renderer.shadowMap.enabled=true;this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;host.appendChild(this.renderer.domElement);this.scene.add(new THREE.HemisphereLight(0xa9d9ff,0x2b241c,2.3));const sun=new THREE.DirectionalLight(0xffd8a0,3);sun.position.set(-13,25,12);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-45;sun.shadow.camera.right=45;sun.shadow.camera.top=35;sun.shadow.camera.bottom=-35;this.scene.add(sun);
+ constructor(host:HTMLElement){this.scene.background=new THREE.Color('#101923');this.scene.fog=new THREE.Fog('#101923',42,95);this.renderer=new THREE.WebGLRenderer({antialias:true});this.renderer.setPixelRatio(Math.min(devicePixelRatio,2));this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.12;this.renderer.shadowMap.enabled=true;this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;host.appendChild(this.renderer.domElement);this.scene.add(new THREE.HemisphereLight(0xa9d9ff,0x2b241c,2.3));const sun=new THREE.DirectionalLight(0xffd8a0,3);sun.position.set(-13,25,12);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-45;sun.shadow.camera.right=45;sun.shadow.camera.top=35;sun.shadow.camera.bottom=-35;this.scene.add(sun);
  const grass=new THREE.Mesh(new THREE.BoxGeometry(MAP.width,1,MAP.height),new THREE.MeshStandardMaterial({color:0x294b42,roughness:1}));grass.position.y=-.55;grass.receiveShadow=true;this.scene.add(grass);this.ground=grass;
  const tile=(x:number,z:number,w:number,d:number,color:number,y=-.015)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,.12,d),new THREE.MeshStandardMaterial({color,roughness:.9}));m.position.set(x,y,z);m.receiveShadow=true;this.scene.add(m);return m;};
  tile(0,0,60,7,0x5d615a);for(let x=-29;x<30;x+=2.4){tile(x,0,2.1,5.6,Math.floor(x)%2===0?0x77756a:0x6b6e66,.055);}for(let x=-30;x<=30;x+=3){tile(x,4.1,2.4,.4,0x354f3e);tile(x,-4.1,2.4,.4,0x354f3e);}
@@ -14,8 +15,8 @@ export class WorldRenderer{
  }
  base(x:number,color:number){const g=new THREE.Group();const mat=new THREE.MeshStandardMaterial({color,emissive:color,emissiveIntensity:.25,metalness:.25});for(let i=0;i<3;i++){const b=new THREE.Mesh(new THREE.BoxGeometry(3.6-i*.7,.5,3.6-i*.7),new THREE.MeshStandardMaterial({color:i%2?0x263744:0x465463}));b.position.y=.15+i*.42;g.add(b);}const crystal=new THREE.Mesh(new THREE.OctahedronGeometry(.95),mat);crystal.position.y=2.3;g.add(crystal);g.position.x=x;this.scene.add(g);}
  createUnit(u:Unit){const g=new THREE.Group();g.position.set(u.x,0,u.z);const blue=u.team==='blue';const primary=new THREE.MeshStandardMaterial({color:u.kind==='hero'?0xc34a2c:blue?0x348cdd:0xc84650,roughness:.7});const dark=new THREE.MeshStandardMaterial({color:u.kind==='hero'?0x3d292b:blue?0x1d4169:0x652d35});const gold=new THREE.MeshStandardMaterial({color:0xffba57,emissive:0xc35b1b,emissiveIntensity:.6});const cube=(w:number,h:number,d:number,x:number,y:number,z:number,mat:THREE.Material)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);m.castShadow=true;g.add(m);return m;};
- if(u.kind==='tower'){cube(2.5,1.2,2.5,0,.6,0,dark);cube(1.65,3.5,1.65,0,2.6,0,primary);cube(2.5,.7,2.5,0,4.6,0,dark);for(const dx of [-.9,.9])for(const dz of [-.9,.9])cube(.6,.8,.6,dx,5.2,dz,primary);cube(.8,1.1,.8,0,5.5,0,gold); }else{
- const hero=u.kind==='hero',s=hero?1:.65;
+ if(u.kind==='tower'){cube(2.5,1.2,2.5,0,.6,0,dark);cube(1.65,3.5,1.65,0,2.6,0,primary);cube(2.5,.7,2.5,0,4.6,0,dark);for(const dx of [-.9,.9])for(const dz of [-.9,.9])cube(.6,.8,.6,dx,5.2,dz,primary);cube(.8,1.1,.8,0,5.5,0,gold); }else if(u.kind==='hero'){g.add(createKael());Object.assign(g.userData,{phase:0,walk:0,attack:0,spin:0,dashing:false,lean:0,fireClock:0,fireTime:0});}else{
+ const hero=false,s=.65;
  const skin=new THREE.MeshStandardMaterial({color:0xe6ad80,roughness:1});
  const hair=new THREE.MeshStandardMaterial({color:0x292136,roughness:1});
  const steel=new THREE.MeshStandardMaterial({color:0xafdbe4,metalness:.65,roughness:.3});
@@ -65,6 +66,7 @@ export class WorldRenderer{
  g.userData.walk+=(Number(moving)-g.userData.walk)*blend;
  const weight=g.userData.walk;
  g.userData.phase+=moved*(u.kind==='hero'?3.6:5);
+ const cape=g.getObjectByName('cape');if(cape){cape.rotation.x=.08+g.userData.walk*.16+Math.sin(g.userData.phase*.7)*.045;cape.rotation.z=Math.sin(g.userData.phase)*.055;}
  const phase=g.userData.phase,swing=Math.sin(phase)*.48*weight;
  body.position.y=(1-Math.cos(phase*2))*.035*weight;
  body.rotation.z=Math.sin(phase)*.035*weight;
