@@ -1,0 +1,3 @@
+import type {Unit} from './combat';
+import {damage,distance} from './combat';
+export function updateTowers(dt:number,units:Unit[],onHit:(x:number,z:number)=>void){for(const tower of units.filter(u=>u.kind==='tower'&&u.alive)){tower.attackTimer=Math.max(0,tower.attackTimer-dt);if(tower.attackTimer>0)continue;const enemies=units.filter(u=>u.alive&&u.team!==tower.team&&distance(u,tower)<=tower.range);enemies.sort((a,b)=>(a.kind==='minion'?0:1)-(b.kind==='minion'?0:1)||distance(a,tower)-distance(b,tower));const target=enemies[0];if(target){damage(target,tower.attack);tower.attackTimer=tower.attackInterval;onHit(target.x,target.z);}}}

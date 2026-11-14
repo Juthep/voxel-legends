@@ -1,0 +1,8 @@
+export type Team='blue'|'red';
+export type UnitKind='hero'|'minion'|'tower';
+export interface Unit {id:number;kind:UnitKind;team:Team;x:number;z:number;hp:number;maxHp:number;attack:number;defense:number;range:number;attackInterval:number;attackTimer:number;speed:number;alive:boolean;shield:number;shieldTime:number;targetId:number|null;}
+export function mitigation(raw:number,defense:number){return Math.max(0,raw)*100/(100+Math.max(0,defense));}
+export function damage(target:Unit,raw:number){if(!target.alive)return 0;let value=mitigation(raw,target.defense);const absorbed=Math.min(value,target.shield);target.shield-=absorbed;value-=absorbed;target.hp=Math.max(0,target.hp-value);if(target.hp===0)target.alive=false;return value;}
+export function distance(a:{x:number;z:number},b:{x:number;z:number}){return Math.hypot(a.x-b.x,a.z-b.z);}
+export function approach(unit:Unit,x:number,z:number,step:number){const dx=x-unit.x,dz=z-unit.z,d=Math.hypot(dx,dz);if(d<0.001)return;const s=Math.min(d,unit.speed*step);unit.x+=dx/d*s;unit.z+=dz/d*s;unit.x=Math.max(-28,Math.min(28,unit.x));unit.z=Math.max(-16,Math.min(16,unit.z));}
+export function createUnit(id:number,kind:UnitKind,team:Team,x:number,z:number,stats:{maxHp:number;attack:number;defense:number;range:number;attackInterval:number;speed?:number}):Unit{return{id,kind,team,x,z,hp:stats.maxHp,maxHp:stats.maxHp,attack:stats.attack,defense:stats.defense,range:stats.range,attackInterval:stats.attackInterval,attackTimer:0,speed:stats.speed??0,alive:true,shield:0,shieldTime:0,targetId:null};}
